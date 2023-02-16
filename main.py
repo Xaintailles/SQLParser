@@ -6,37 +6,74 @@ This is a temporary script file.
 """
 
 import re
+import os
 
 #TO DO: bug when handling LEFT JOIN, we get index of JOIN
 source_to_search_for = ['FROM','JOIN']
-destination_to_search_for = ['INSERT INTO']
+destination_to_search_for = ['INSERT INTO','CREATE TABLE IF NOT EXISTS']
 
-query = 'INSERT INTO dwh.fact_order (SELECT * FROM dwh.fact_order fo LEFT JOIN dwh.dim_order do on do.orderid = fo.orderid LEFT JOIN staging.all_orders so on so.source_order_id = do.sourceorderid)'
+def looking_for_table(searchable__string: list,semantic_elements: list) -> list:
+    """
+    Parameters
+    ----------
+    searchable__string : list
+        String that contains the SQL query that you want to parse
+    semantic_elements : list
+        List of semantic elements that sit before your table name
+        For exemple, JOIN, FROM, INSERT INTO
 
-def looking_for_table(searchable__string,semantic_elements):
-    start_index = []
+    Returns
+    -------
+    list
+        Returns a list of table names
+    """
     
-    #here we grab every index for the first letter of the semantic elements
-    for semantic_element in semantic_elements:
-        start_index.append([m.end() + 1 for m in re.finditer(semantic_element, searchable__string)])
+    #nested list comprehension here
+    #outer loops over the list of semantic elements
+    #while inner goes over the full string and finds every occurence of the semantic element
+    start_index = [[m.end() + 1 for m in re.finditer(semantic_element, searchable__string)] for semantic_element in semantic_elements]
     
     #gives a list of lists, need to flatten
     start_index = [item  for sublist in start_index for item in sublist]
     start_index.sort()
     
-    end_index = []
+    #we get the end_index but getting the index of the next space after the start_index
+    end_index = [searchable__string.find(' ', index) for index in start_index]
     
-    for index in start_index:
-        end_index.append(searchable__string.find(' ', index))
-        
-    all_tables = []
-    
-    for start, end in zip(start_index,end_index):
-        all_tables.append(searchable__string[start:end])
+    #we look for the substring based on the 2 lists of indexes    
+    all_tables = [searchable__string[start:end] for start,end in zip(start_index,end_index)]
 
     return all_tables
 
-all_sources = looking_for_table(query,source_to_search_for)
-all_destinations = looking_for_table(query,destination_to_search_for)
+def read_repository(repos_path: str) -> list:
+    """
+    Parameters
+    ----------
+    repos_path : str
+        root path of the repository that needs to be parsed.
 
-print(all_sources, all_destinations)
+    Returns
+    -------
+    list
+        list of full path for every file contains under the root.
+    """
+    all_files_paths = []
+    
+    for dirpath, dirnames, filenames in os.walk(repos_path):
+        if len(filenames) == 0:
+            continue
+        else:
+            for filename in filenames:
+                all_files_paths.append(dirpath +  "\\" + filename)
+    
+    return all_files_paths
+
+               
+for file_path in read_repository(r"C:\Users\Calixte\Desktop\Repos Example"):   
+    f = open(file_path,"r")
+    print(f.read())
+
+#all_sources = looking_for_table(query,source_to_search_for)
+#all_destinations = looking_for_table(query,destination_to_search_for)
+
+#print(all_sources, all_destinations)

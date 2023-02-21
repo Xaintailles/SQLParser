@@ -7,12 +7,9 @@ This is a temporary script file.
 
 import re
 import os
+import pandas as pd
 
-#TO DO: bug when handling LEFT JOIN, we get index of JOIN
-source_to_search_for = ['FROM','JOIN']
-destination_to_search_for = ['INSERT INTO','CREATE TABLE IF NOT EXISTS']
-
-def looking_for_table(searchable__string: list,semantic_elements: list) -> list:
+def looking_for_table(searchable__string: str,semantic_elements: list) -> list:
     """
     Parameters
     ----------
@@ -68,12 +65,58 @@ def read_repository(repos_path: str) -> list:
     
     return all_files_paths
 
+all_queries = []
+all_file_paths = []
                
 for file_path in read_repository(r"C:\Users\Calixte\Desktop\Repos Example"):   
-    f = open(file_path,"r")
-    print(f.read())
+    with open(file_path,"r") as f:
+        all_queries.append(f.read())
+        all_file_paths.append(file_path)
 
-#all_sources = looking_for_table(query,source_to_search_for)
-#all_destinations = looking_for_table(query,destination_to_search_for)
+source_to_search_for = ['FROM','JOIN']
+destination_to_search_for = ['INSERT INTO','CREATE TABLE IF NOT EXISTS']
 
-#print(all_sources, all_destinations)
+all_sources = []
+all_destinations = []
+
+for query in all_queries:
+    all_sources.append(looking_for_table(query,source_to_search_for))
+    all_destinations.append(looking_for_table(query,destination_to_search_for))
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

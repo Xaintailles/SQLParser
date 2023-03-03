@@ -69,8 +69,9 @@ def looking_for_table(searchable__string: str,
     #doing some cleaning_up, based on the list we get begining of the function
     for string_to_replace in cleaning_list:
         all_tables = [s.replace(string_to_replace,'') for s in all_tables]
-
-    return all_tables
+    
+    #Return only the distinct list of values
+    return set(all_tables)
 
 def read_repository(repos_path: str) -> list:
     """
@@ -115,7 +116,30 @@ for query in all_queries:
     all_sources.append(looking_for_table(query,source_to_search_for,cleaning_list))
     all_destinations.append(looking_for_table(query,destination_to_search_for,cleaning_list))
     
-print(min('Thisisanexample'.find(' '),'This isanexample'.find(' ')))
+f_all_sources = []
+    
+for i in range(len(all_sources)):
+    f_all_sources.append((i,all_sources[i]))
+ 
+f_all_destinations = []  
+    
+for i in range(len(all_destinations)):
+    f_all_destinations.append((i,all_destinations[i]))
+    
+df_sources = pd.DataFrame(f_all_sources)
+df_sources.columns = ['Index','Source']
+
+df_destinations = pd.DataFrame(f_all_destinations)
+df_destinations.columns = ['Index','Destination']
+
+df_sources = df_sources.explode('Source')
+df_destinations = df_destinations.explode('Destination')
+
+final = pd.merge(df_destinations, df_sources, on='Index')
+
+
+    
+
     
     
     

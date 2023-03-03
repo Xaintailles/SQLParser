@@ -45,12 +45,23 @@ def looking_for_table(searchable__string: str,
     
     end_index = []
     
+    #Stupid line of code here.
+    #We identify new lines, spaces or (
+    #From there we find where each of these elements is after the start index.
+    #find returns -1 as default when not found, so we need to remove negative values.
+    #Then we get the minimum of the positive numbers, and that is the cut-off
+    
     for i in range(len(space_end_index)):
-        space = space_end_index[i]
-        line = line_end_index[i]
-        parenthesis = parenthesis_end_index[i]
         
-        end_index.append(min(space,min(line,parenthesis)))
+        all_next_indexes = []
+        
+        all_next_indexes.append(space_end_index[i])
+        all_next_indexes.append(line_end_index[i])
+        all_next_indexes.append(parenthesis_end_index[i])
+        
+        all_next_indexes = list(filter(lambda x : x > 0, all_next_indexes))
+        
+        end_index.append(min(all_next_indexes))
     
     #we look for the substring based on the 2 lists of indexes    
     all_tables = [searchable__string[start:end] for start,end in zip(start_index,end_index)]
@@ -103,6 +114,8 @@ all_destinations = []
 for query in all_queries:
     all_sources.append(looking_for_table(query,source_to_search_for,cleaning_list))
     all_destinations.append(looking_for_table(query,destination_to_search_for,cleaning_list))
+    
+print(min('Thisisanexample'.find(' '),'This isanexample'.find(' ')))
     
     
     

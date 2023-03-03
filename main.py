@@ -9,20 +9,24 @@ import re
 import os
 import pandas as pd
 
-def looking_for_table(searchable__string: str,semantic_elements: list) -> list:
+def looking_for_table(searchable__string: str,
+                      semantic_elements: list,
+                      cleaning_list=['\n','(',')']) -> list:
     """
     Parameters
     ----------
-    searchable__string : list
-        String that contains the SQL query that you want to parse
+    searchable__string : str
+        string that will be searched for table references.
     semantic_elements : list
-        List of semantic elements that sit before your table name
-        For exemple, JOIN, FROM, INSERT INTO
+        List of SQL semantic that is used to identify tables.
+    cleaning_list : list
+        List of characters that we want to remove.
 
     Returns
     -------
     list
-        Returns a list of table names
+        List of tables that have been detected and parsed from the SQL string.
+
     """
     
     #nested list comprehension here
@@ -35,10 +39,25 @@ def looking_for_table(searchable__string: str,semantic_elements: list) -> list:
     start_index.sort()
     
     #we get the end_index but getting the index of the next space after the start_index
-    end_index = [searchable__string.find(' ', index) for index in start_index]
+    space_end_index = [searchable__string.find(' ', index) for index in start_index]
+    line_end_index = [searchable__string.find('\n', index) for index in start_index]
+    parenthesis_end_index = [searchable__string.find('(', index) for index in start_index]
+    
+    end_index = []
+    
+    for i in range(len(space_end_index)):
+        space = space_end_index[i]
+        line = line_end_index[i]
+        parenthesis = parenthesis_end_index[i]
+        
+        end_index.append(min(space,min(line,parenthesis)))
     
     #we look for the substring based on the 2 lists of indexes    
     all_tables = [searchable__string[start:end] for start,end in zip(start_index,end_index)]
+    
+    #doing some cleaning_up, based on the list we get begining of the function
+    for string_to_replace in cleaning_list:
+        all_tables = [s.replace(string_to_replace,'') for s in all_tables]
 
     return all_tables
 
@@ -75,13 +94,15 @@ for file_path in read_repository(r"C:\Users\Calixte\Desktop\Repos Example"):
 
 source_to_search_for = ['FROM','JOIN']
 destination_to_search_for = ['INSERT INTO','CREATE TABLE IF NOT EXISTS']
+cleaning_list = ['\n','(',')']
 
 all_sources = []
 all_destinations = []
 
+
 for query in all_queries:
-    all_sources.append(looking_for_table(query,source_to_search_for))
-    all_destinations.append(looking_for_table(query,destination_to_search_for))
+    all_sources.append(looking_for_table(query,source_to_search_for,cleaning_list))
+    all_destinations.append(looking_for_table(query,destination_to_search_for,cleaning_list))
     
     
     

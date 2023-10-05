@@ -121,5 +121,3 @@ def get_reserved_keywords(sql_dialect: str) -> list:
         reserved_keywords = gcp_keywords
     
     return reserved_keywords
-
-print(get_reserved_keywords(sql_dialect='gcp'))

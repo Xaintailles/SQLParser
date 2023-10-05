@@ -5,6 +5,7 @@ Created on Tue Aug  8 07:44:36 2023
 @author: Calixte
 """
 
+import pandas as pd
 import re
 from reserved_keywords import get_reserved_keywords
 
